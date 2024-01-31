@@ -1,0 +1,398 @@
+[Q] How to get the manuals in GRASS GIS?
+[A] You can get the full manual using `g.manual module_name`, for example `g.manual r.info`. Additionally, you can use the --help flag with the module name to get a shorter description of the module and its parameters. For example `r.info --help`
+
+[Q] How to get metadata of a raster map in GRASS GIS?
+[A] With module `r.info`.
+
+[Q] How to recognize raster modules in GRASS GIS?
+[A] They start with `r.`.
+
+[Q] How to recognize vector modules in GRASS GIS?
+[A] They start with `v.`.
+
+[Q] How to connect to a database in GRASS GIS?
+[A] With module `db.connect`.
+
+[Q] How to connect to PostgreSQL in GRASS GIS?
+[A] Use `driver=pg` in your `db.connect` module.
+
+[Q] How to start graphical user interface in GRASS GIS?
+[A] With module `g.gui`.
+
+[Q] How to launch graphical attribute table manager in GRASS GIS?
+[A] With module `g.gui.dbmgr`.
+
+[Q] How to list columns of a PostgreSQL attribute table in GRASS GIS?
+[A] Using the following command: `db.columns table=table_name driver=pg database=grassdb`
+
+[Q] How to list columns from a Shapefile in GRASS GIS??
+[A] Using the following command: `db.columns table=table_name driver=dbf database=grassdb`
+
+[Q] How to list columns of a table in SQLite database in GRASS GIS?
+[A] Using the following command: `db.columns table=table_name driver=sqlite database=grassdb`
+
+[Q] What is the purpose of the v.db.addtable module?
+[A] The v.db.addtable module creates and connects a new attribute table to a specified layer of an existing vector map in GRASS GIS.
+
+[Q] What are the key flags available for v.db.addtable?
+[A] The key flags for v.db.addtable are: --help: Print usage summary, --verbose: Verbose module output, --quiet: Quiet module output, --ui: Force launching GUI dialog.
+
+[Q] What parameters are required for v.db.addtable?
+[A] The required parameters are: map=name: Name of the vector map or data source for direct OGR access.
+
+[Q] What is the default name for a new attribute table in v.db.addtable?
+[A] By default, the name of the new attribute table is set to the name of the vector map.
+
+[Q] How can you specify the layer number for adding a new attribute table in v.db.addtable?
+[A] You can specify the layer number using the layer=integer parameter, with the default being 1.
+
+[Q] What is the purpose of the key=name parameter in v.db.addtable?
+[A] The key=name parameter specifies the name of the key column, which must refer to an integer column. The default key column name is 'cat.'
+
+[Q] What types of columns are supported when adding a new attribute table in v.db.addtable?
+[A] The supported column types depend on the database backend, but all backends should support VARCHAR(), INT, DOUBLE PRECISION, and DATE.
+
+[Q] How can one verify the existing database connection(s) in v.db.addtable?
+[A] The existing database connections can be verified using the v.db.connect module.
+
+[Q] What does v.db.addtable do if the vector map is not yet linked to any table?
+[A] If the vector map is not yet linked to any table, v.db.addtable establishes a new database link based on the MAPSET database settings (see db.connect).
+
+[Q] How can category values be inserted into the table in v.db.addtable?
+[A] Category values are inserted into the table for features that have a category value in the relevant layer. Users can add category values automatically using v.category or manually with wxGUI vector digitizer before running v.db.addtable.
+
+[Q] What is v.db.addtable a front-end to?
+[A] v.db.addtable is a front-end to db.execute to allow easier usage.
+
+[Q] How to add a new attribute table with a single column to default layer 1 in GRASS GIS?
+[A] You can do it with the following code:
+g.copy vect=orig_vector,new_vector
+v.db.addtable new_vector columns=`column1 double precision`
+v.db.connect -p new_vector
+
+[Q] How to add a new attribute table with two columns to default layer 1 in GRASS GIS?
+[A] You can do it with the following code:
+g.copy vect=orig_vector,new_vector
+v.db.addtable new_vector columns=`name varchar(15), column2 double precision`
+v.db.connect -p new_vector
+
+[Q] How to add a new attribute table with two columns to layer 2 in GRASS GIS?
+[A] You can do it with the following code:
+g.copy vect=orig_vector,new_vector
+v.db.addtable new_vector columns="column1 double precision, name varchar(15)" layer=2
+v.db.connect -p new_vector
+
+[Q] What is the purpose of the db.connect module in GRASS GIS?
+[A] The db.connect module in GRASS GIS allows the user to set and manage general database connection parameters for the current mapset.
+
+[Q] What does the -p flag do in db.connect?
+[A] The -p flag in db.connect prints the current connection parameters and exits. It also substitutes variables in database settings.
+
+[Q] How can you check if the connection parameters are set and initialize them if needed in db.connect?
+[A] You can use the -c flag in db.connect to silently check if the connection parameters have been set. If not initialized, it sets them to use GRASS's default values.
+
+[Q] What does the -d flag do in db.connect?
+[A] The -d flag in db.connect sets the connection parameters to default settings and exits. It overwrites current settings if already initialized.
+
+[Q] How can you connect a vector map to a database table using db.connect?
+[A] To connect a vector map to a database table, you can use v.db.connect or v.db.addtable.
+
+[Q] What is the default database backend in GRASS GIS?
+[A] The default database backend in GRASS GIS is SQLite.
+
+[Q] Where are the values db.connect accesses stored?
+[A] The values are stored in the mapset's VAR file in db.connect; however, the connection is not tested for validity.
+
+[Q] What does the -g flag do in db.connect?
+[A] The -g flag in db.connect prints the current connection parameters using shell style and exits.
+
+[Q] What are the options for the driver parameter in db.connect?
+[A] The options for the driver parameter in db.connect include dbf, odbc, ogr, pg, and sqlite. The default is sqlite.
+
+[Q] How can you set a local storage SQLite database as the default in db.connect?
+[A] You can set a local storage SQLite database as the default by using the command db.connect -d.
+
+[Q] What does the -ui flag do in GRASS GIS modules?
+[A] The -ui flag in GRASS GIS modules forces launching a GUI dialog.
+
+[Q] Which flag in db.connect allows checking connection parameters before creating a new database table in scripts?
+[A] The -c flag in db.connect allows checking connection parameters before creating a new database table in scripts.
+
+[Q] How to set local storage with database tables stored in PostgreSQL database `mydb` in GRASS GIS?
+[A] You can do it with the following code (please beware that it might require db.login):
+db.connect driver=pg database=mydb
+db.login user=myname pass=secret
+
+[Q] How to set network storage with database tables stored in PostgreSQL database `mydb` in GRASS GIS?
+[A] You can do it with the following code (please beware that it might require db.login):
+db.connect driver=pg database=mydb
+db.login user=myname pass=secret host=yourhost.com port=666
+
+[Q] How to set local storage with database tables stored in MySQL database `mydb` in GRASS GIS?
+[A] You can do it with the following code (please beware that it might require db.login):
+db.connect driver=mysql database=mydb
+db.login user=myname pass=secret
+
+[Q] How to set network storage with database tables stored in MySQL database `mydb` in GRASS GIS?
+[A] You can do it with the following code (please beware that it might require db.login):
+db.connect driver=mysql database=mydb
+db.login user=myname pass=secret host=yourhost.com port=666
+
+[Q] How to set network storage with database tables stored in ODBC database `mydb` in GRASS GIS?
+[A] You can do it with the following code (please beware that it might require db.login):
+db.connect driver=odbc database=mydb
+db.login user=myname pass=secret host=yourhost.com port=666
+
+[Q] How do you copy a table from DBF to PostgreSQL in GRASS GIS?
+[A] You can do it with the following code:
+db.copy from_driver=dbf from_database='$GISDBASE/$LOCATION_NAME/PERMANENT/dbf' \
+  from_table=table_name to_driver=pg to_database="host=pgserver,dbname=testdb" \
+  to_table=table_name
+
+[Q] How do you copy a table from PostgreSQL to DBF in GRASS GIS?
+[A] You can do it with the following code:
+db.copy from_driver=pg  from_database="host=pgserver.example.org,dbname=testdb" \
+  from_table=table_name to_driver=dbf \
+  to_database='$GISDBASE/$LOCATION_NAME/$MAPSET/dbf' to_table=table_name
+
+[Q] How do you copy a table from PostgreSQL to PostgreSQL with condition in GRASS GIS?
+[A] You can do it with the following code:
+db.copy from_driver=pg  from_database="host=localhost,dbname=testdb" \
+  from_table=table_name to_driver=pg to_database="host=localhost,dbname=testdb" \
+  to_table=selection where="cat < 500"
+
+[Q] How do you copy a table from DBF to SQLite in GRASS GIS?
+[A] You can do it with the following code:
+db.copy from_driver=dbf from_database='$GISDBASE/$LOCATION_NAME/PERMANENT/dbf' \
+   from_table=orig_table to_driver=sqlite \
+   to_database='$GISDBASE/$LOCATION_NAME/$MAPSET/sqlite/sqlite.db' to_table=new_table
+
+[Q] How to get some convenient SQLite viewer in GRASS GIS?
+[A] You can get a convenient SQLite viewer with the following command: `sqlitebrowser $HOME/grassdata/nc_spm_08/user1/sqlite/sqlite.db`
+
+[Q] How do you copy a table from SQLite to DBF in GRASS GIS?
+[A] You can do it with the following code:
+db.copy from_driver=sqlite from_database='$GISDBASE/$LOCATION_NAME/$MAPSET/sqlite/sqlite.db' \
+   from_table=orig_table to_driver=dbf to_database='$GISDBASE/$LOCATION_NAME/$MAPSET/dbf/' \
+   to_table=new_table
+
+[Q] How would you create a new SQLite file-based database in GRASS GIS?
+[A] With the following command: `db.createdb driver=sqlite database=/opt/sqlite.db`.
+ Note that the standard GRASS GIS SQLite database is by default generated in the user's current mapset. This example shows an out-of-mapset database file creation.
+
+[Q] How would you create a new PostgreSQL database in GRASS GIS after the PostgreSQL connection got established through the pg driver?
+[A] With the following command: `db.createdb driver=pg database=grassdb`.
+
+[Q] How would you create a new PostgreSQL database in GRASS GIS after the PostgreSQL connection got established through the odbc driver?
+[A] With the following command: `db.createdb driver=odbc database=grassdb`.
+
+[Q] How to list SQLite databases in the current mapset in GRASS GIS?
+[A] You can use the following command: `db.databases driver=sqlite`
+
+[Q] How to list SQLite databases in a given directory in GRASS GIS?
+[A] You can use the following command: `db.databases driver=sqlite location=/opt/sqlite`
+
+[Q] How to list PostgreSQL databases from database server running on a given port in GRASS GIS?
+[A] You can use the following command: `db.databases driver=pg location="host=server_name port=given_port"`
+
+[Q] How to list column descriptions of table in SQLite database in GRASS GIS?
+[A] db.describe driver=sqlite table=my_table \
+   database='$GISDBASE/$LOCATION_NAME/$MAPSET/sqlite/sqlite.db'
+Note that the SQLite database is the default setting.
+
+[Q] How to list column descriptions of table in SQLite database in GRASS GIS in a simple way?
+[A] db.describe my_table
+
+[Q] What would the `db.describe -c table=my_table database='$GISDBASE/$LOCATION_NAME/PERMANENT/dbf/' driver=dbf` output look like in GRASS GIS?
+[A] ncols: 16
+nrows: 160
+Column 1: cat:INTEGER:11
+Column 2: OBJECTID:INTEGER:11
+Column 3: AREA:DOUBLE PRECISION:20
+[...]
+
+[Q] What would the `db.describe table=my_table database='$GISDBASE/$LOCATION_NAME/PERMANENT/dbf/' driver=dbf` output look like in GRASS GIS?
+[A] table:hospitals
+description:
+insert:yes
+delete:yes
+ncols:16
+nrows:160
+column:cat
+description:
+type:INTEGER
+len:11
+scale:0
+precision:10
+default:
+nullok:yes
+select:yes
+update:yes
+column:OBJECTID
+description:
+type:INTEGER
+[...]
+
+[Q] What module should I use to list all GRASS GIS database drivers?
+[A] db.drivers
+
+[Q] How to drop a column in GRASS GIS?
+[A] db.dropcolumn -f my_table column=SHAPE_LEN
+
+[Q] How to show what dropping a column in GRASS GIS would do?
+[A] db.dropcolumn my_table column=SHAPE_LEN
+
+[Q] How to drop (delete) an existing database connected through SQLite driver in GRASS GIS?
+[A] `db.dropdb driver=sqlite database=/opt/sqlite.db`
+Note that the standard GRASS GIS SQLite database is by default found in the user's current mapset. This example shows an out-of-mapset database removal.
+
+[Q] How to drop an existing database connected through PostgreSQL driver?
+[A] db.dropdb driver=pg database=grassdb
+
+[Q] How to drop a table in GRASS GIS?
+[A] db.droptable -f my_table
+
+[Q] How to show what dropping a table in GRASS GIS would do?
+[A] db.droptable my_table
+
+[Q] How to remove an attribute table from a given database in GRASS GIS?
+[A] `db.droptable -f table=sometable driver=sqlite database=/opt/sqlite.db`
+db.droptable allows defining optionally driver and database options different from default connection settings (db.connect -p). 
+
+[Q] How to create a new table with columns 'cat' and 'soiltype' in GRASS GIS?
+db.execute sql="CREATE TABLE soils (cat integer, soiltype varchar(10))"
+
+[Q] How to create a new table landcover with columns 'cat' and 'lc' in GRASS GIS?
+db.execute sql="CREATE TABLE soils (cat integer, lc varchar(10))"
+
+[Q] How to create a new table using a file with SQL statements in GRASS GIS?
+[A] db.execute driver=odbc database=grassdb input=file.sql
+
+[Q] How to insert new row into attribute table in GRASS GIS?
+[A] db.execute sql="INSERT INTO mysites (id,name,east,north) values (30,'Ala',1657340,5072301)"
+
+[Q] How to update attribute entries to new value based on SQL rule in GRASS GIS?
+[A] db.execute sql="UPDATE roads SET travelcost=5 WHERE cat=1"
+
+[Q] How to update attribute entries to new value based on SQL rule in GRASS GIS?
+[A] db.execute sql="UPDATE dourokukan SET testc=50 WHERE testc is NULL"
+
+[Q] How to delete selected rows from attribute table in GRASS GIS?
+[A] db.execute sql="DELETE FROM gsod_stationlist WHERE latitude < -91"
+
+[Q] How to add new column to attribute table in GRASS GIS?
+[A] db.execute sql="ALTER TABLE roads ADD COLUMN length double"
+
+[Q] How to do a column type conversion - update new column from existing column in GRASS GIS?
+[A] `echo "UPDATE geodetic_pts SET z = CAST(z_value AS numeric)" | db.execute input=-`
+Note that this does not work for the DBF driver.
+
+[Q] How to drop column from attribute table in GRASS GIS?
+[A] db.execute sql="ALTER TABLE roads DROP COLUMN length"
+
+[Q] How to drop table in GRASS GIS?
+[A] `db.execute sql="DROP TABLE my_copy"`
+Note that thIs is not supported by all drivers.
+
+[Q] How to update attribute with multiple SQL instructions in file (e.g., `file.sql`) in GRASS GIS?
+[A] `UPDATE roads SET travelcost=5 WHERE cat=1;
+UPDATE roads SET travelcost=2 WHERE cat=2;
+db.execute input=file.sql`
+Note that the instruction line must end with a semicolon
+
+[Q] How to join table 'myroads' to table 'extratab' based on common 'cat' column values in GRASS GIS?
+[A] `db.execute sql="UPDATE extratab SET names=(SELECT label FROM myroads WHERE extratab.cat=myroads.cat)"`
+Not that this is not supported by DBF driver.
+
+[Q] How to import a CSV file into GRASS GIS?
+[A] `db.in.ogr input=koeppen_gridcode.csv output=koeppen_gridcode`
+Note that limited type recognition can be done for Integer, Real, String, Date, Time and DateTime columns through a descriptive file with same name as the CSV file, but .csvt extension.
+
+[Q] How to import DBF table into GRASS GIS?
+[A] `db.in.ogr input=/path/to/mydata.dbf output=census_raleigh key=myid`
+Note that the example imports a DBF table with additional unique key column (e.g., needed for v.in.db).
+
+[Q] How to import an SQLite table into GRASS GIS?
+[A] db.in.ogr input=/path/to/sqlite.db db_table=census_raleigh output=census_raleigh
+
+[Q] How to import a PostgreSQL table in GRASS GIS?
+[A] `db.in.ogr input="PG:host=localhost dbname=ecad user=neteler" db_table=ecad_verona_tmean output=ecad_verona_tmean`
+Note: if the database contains spatial tables, but you want to import a non-spatial table, set the environmental variable PG_LIST_ALL_TABLES to YES before importing
+
+[Q] How to import XLS file into GRASS GIS?
+[A] `db.in.ogr input=address.xls db_table=address_data`
+Note:  To force reading headers, define environmental variable OGR_XLS_HEADERS='FORCE'. Parameter db_table refers to the list within XLS file.
+
+[Q] How to log into a database in GRASS GIS when no password is needed?
+[A] db.login driver=pg database=mydb
+
+[Q] How to log into a database in GRASS GIS when password is needed?
+[A] db.login driver=pg database=mydb user=bacava password=secret host=db.example.com
+
+[Q] How to log into a database in GRASS GIS with only username and empty password?
+[A] db.login driver=pg database=mydb database=mydb user=bacava password=""
+
+[Q] How to export a GRASS GIS attribute table to a CSV table file?
+[A] db.out.ogr input=precip_30ynormals output=precip_30ynormals.csv
+
+[Q] How to export a GRASS GIS attribute table to a DBF table?
+[A] db.out.ogr input=precip_30ynormals output=precip_30ynormals.dbf format=DBF
+
+[Q] How to export a GRASS GIS attribute table into a PostgreSQL table?
+[A] db.out.ogr input=precip_30ynormals \
+	   output="PG:host=localhost dbname=meteo user=neteler" \
+           format=PostgreSQL
+
+[Q] Give an example of db.select use in GRASS GIS
+[A] echo "select * from roads" | db.select input=-
+
+[Q] How to select all from table `roads` in GRASS GIS?
+[A] db.select -c driver=odbc database=mydb table=hospitals input=file.sql output=result.csv
+
+[Q] How to select some string attribute and exclude others in GRASS GIS?
+[A] db.select sql="SELECT * FROM archsites WHERE str1 <> 'No Name'"
+
+[Q] How to select some string attribute with zero lenght in GRASS GIS?
+[A] db.select sql="SELECT * FROM archsites WHERE str1 IS NULL"
+
+[Q] How to select coordinates from PostGIS table in GRASS GIS?
+[A] db.select sql="SELECT x(geo),y(geo) FROM localizzazione"
+
+[Q] How to execute multiple SQL statements in GRASS GIS?
+[A] cat file.sql
+SELECT * FROM busstopsall WHERE cat = 1
+SELECT cat FROM busstopsall WHERE cat > 4 AND cat < 8
+db.select input=file.sql
+
+[Q] How to count number of cases falling into same position in GRASS GIS?
+[A] db.select sql="SELECT long,lat,site_id,department,obs,COUNT(long) as count_cases FROM diseases GROUP BY long,lat"
+
+[Q] How to list all tables in GRASS GIS if database connection is already set?
+[A] db.tables -p
+
+[Q] How to list all DBF tables in GRASS GIS?
+[A] db.tables driver=dbf database=/grassdata/nc_spm_08/user1/PERMANENT/dbf
+
+[Q] How to list all tables in SQLite database in GRASS GIS?
+[A] db.tables -p driver=sqlite database='$GISDBASE/$LOCATION_NAME/$MAPSET/sqlite/sqlite.db'
+
+[Q] How to test current SQL backend driver in GRASS GIS?
+[A] db.connect -p
+db.test test=test1
+
+[Q] How to perform univariate statistics on a database in GRASS GIS?
+[A] db.univar my_vector column=column_of_interest
+
+[Q] Generate an example with univariate statistics on a database in GRASS GIS.
+[A] g.region raster=elevation -p
+v.random output=samples n=100
+v.db.addtable samples column="heights double precision"
+v.what.rast samples raster=elevation column=heights
+v.db.select samples
+db.univar samples column=heights
+
+[Q] I need to populate a column in attribute table based on the square root of entries from another column in GRASS GIS. I tried the field calculator with no success.
+[A] Functionalities like sqrt() or log() are not available in base SQLite (an issue unrelated to GRASS GIS). You will have to install an SQLite extension. But math functions in SQLite are also available when SQLite’s amalgamation is compiled with  `-DSQLITE_ENABLE_MATH_FUNCTIONS`. Since sqlite3 3.35, in March 2021, that option is on by default.
+
+[Q] I want to install the r.clip addon in Ubuntu 22.04.3 LTS. I am using GRASS 8.2.0. I also installed svn and grass-dev. When I use g.extension I get the error `GRASS Addons r.clip not found`. How to overcome it?
+[A] You could download the r.clip folder to your disk and install the extension using the path to the folder. Something like: g.extension extension=r.clip url=path/to/folder/r.clip
