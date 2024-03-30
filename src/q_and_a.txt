@@ -66,24 +66,32 @@
 
 [Q] How to add a new attribute table with a single column to default layer 1 in GRASS GIS?
 [A] You can do it with the following code:
-g.copy vect=orig_vector,new_vector
-v.db.addtable new_vector columns=`column1 double precision`
-v.db.connect -p new_vector
+v.db.addtable vector_map columns=`column1 double precision`
+v.db.connect -p vector_map
 
 [Q] How to add a new attribute table with two columns to default layer 1 in GRASS GIS?
 [A] You can do it with the following code:
-g.copy vect=orig_vector,new_vector
-v.db.addtable new_vector columns=`name varchar(15), column2 double precision`
-v.db.connect -p new_vector
+v.db.addtable vector_map columns=`name varchar(15), column2 double precision`
+v.db.connect -p vector_map
 
 [Q] How to add a new attribute table with two columns to layer 2 in GRASS GIS?
 [A] You can do it with the following code:
-g.copy vect=orig_vector,new_vector
-v.db.addtable new_vector columns="column1 double precision, name varchar(15)" layer=2
-v.db.connect -p new_vector
+v.db.addtable vector_map columns="column1 double precision, name varchar(15)" layer=2
+v.db.connect -p vector_map
+
+[Q] How to add a new attribute table with two columns to layer 3 in GRASS GIS?
+[A] You can do it with the following code:
+v.db.addtable vector_map columns="column1 double precision, name varchar(15)" layer=3
+v.db.connect -p vector_map
+
+[Q] How to create an attribute table with columns elevation, latitude ad temp in GRASS GIS?
+[A] v.db.addtable map=samples, columns="elevation double precision, latitude double precision, temp double precision"
 
 [Q] What is the purpose of the db.connect module in GRASS GIS?
 [A] The db.connect module in GRASS GIS allows the user to set and manage general database connection parameters for the current mapset.
+
+[Q] Explain the purpose of the db.connect module in GRASS GIS.
+[A] The db.connect module is used to connect or disconnect GRASS GIS from a database, allowing seamless interaction between the GIS and external databases.
 
 [Q] What does the -p flag do in db.connect?
 [A] The -p flag in db.connect prints the current connection parameters and exits. It also substitutes variables in database settings.
@@ -127,6 +135,11 @@ db.login user=myname pass=secret
 [A] You can do it with the following code (please beware that it might require db.login):
 db.connect driver=pg database=mydb
 db.login user=myname pass=secret host=yourhost.com port=666
+
+[Q] How to set network storage with database tables stored in PostgreSQL database `mydb` in schema `myschema` through port 88 in GRASS GIS?
+[A] You can do it with the following code (please beware that it might require db.login):
+db.connect driver=pg database=mydb schema=myschema
+db.login user=myname pass=secret host=yourhost.com port=88
 
 [Q] How to set local storage with database tables stored in MySQL database `mydb` in GRASS GIS?
 [A] You can do it with the following code (please beware that it might require db.login):
@@ -204,12 +217,15 @@ Note that the SQLite database is the default setting.
 [A] db.describe my_table
 
 [Q] What would the `db.describe -c table=my_table database='$GISDBASE/$LOCATION_NAME/PERMANENT/dbf/' driver=dbf` output look like in GRASS GIS?
-[A] ncols: 16
+[A] This is an example of what the output could look like:
+```
+ncols: 16
 nrows: 160
 Column 1: cat:INTEGER:11
 Column 2: OBJECTID:INTEGER:11
 Column 3: AREA:DOUBLE PRECISION:20
 [...]
+```
 
 [Q] What would the `db.describe table=my_table database='$GISDBASE/$LOCATION_NAME/PERMANENT/dbf/' driver=dbf` output look like in GRASS GIS?
 [A] table:hospitals
@@ -294,6 +310,12 @@ Note that this does not work for the DBF driver.
 [A] `db.execute sql="DROP TABLE my_copy"`
 Note that thIs is not supported by all drivers.
 
+[Q] How can you execute an SQL command to update values in the "population" column of the first row in the "cities" table using db.execute in GRASS GIS?
+[A] db.execute sql="UPDATE cities SET population = 100000 WHERE id = 1;"
+
+[Q] How can you execute an SQL command to update the "population" value to 20 of the fifth row in the "cities" table using db.execute in GRASS GIS?
+[A] db.execute sql="UPDATE cities SET population = 20 WHERE id = 5;"
+
 [Q] How to update attribute with multiple SQL instructions in file (e.g., `file.sql`) in GRASS GIS?
 [A] `UPDATE roads SET travelcost=5 WHERE cat=1;
 UPDATE roads SET travelcost=2 WHERE cat=2;
@@ -307,6 +329,13 @@ Not that this is not supported by DBF driver.
 [Q] How to import a CSV file into GRASS GIS?
 [A] `db.in.ogr input=koeppen_gridcode.csv output=koeppen_gridcode`
 Note that limited type recognition can be done for Integer, Real, String, Date, Time and DateTime columns through a descriptive file with same name as the CSV file, but .csvt extension.
+
+[Q] How to import a CSV file called DPA_deer_densities.csv into GRASS GIS and overwrite the existing table?
+[A] `db.in.ogr input=DPA_deer_densities.csv output=DPA_deer_densities --overwrite`
+Note that limited type recognition can be done for Integer, Real, String, Date, Time and DateTime columns through a descriptive file with same name as the CSV file, but .csvt extension.
+
+[Q] How to join a table to a vector map in GRASS GIS in the scripting library?
+[A] run_command("v.db.join", map="vector_map", column="col", other_table="my_table", other_column="col2")
 
 [Q] How to import DBF table into GRASS GIS?
 [A] `db.in.ogr input=/path/to/mydata.dbf output=census_raleigh key=myid`
@@ -343,8 +372,15 @@ Note:  To force reading headers, define environmental variable OGR_XLS_HEADERS='
 	   output="PG:host=localhost dbname=meteo user=neteler" \
            format=PostgreSQL
 
+[Q] How can you export a vector map named "urban_areas" to a PostgreSQL database providing username `myuser` and password `mypassword` in GRASS GIS?
+[A] Use the following command:
+`db.out.ogr input=urban_areas output="PG:host=localhost dbname=mydatabase user=myuser password=mypassword" format=PostgreSQL`
+
 [Q] Give an example of db.select use in GRASS GIS
 [A] echo "select * from roads" | db.select input=-
+
+[Q] What module should be used to select values from a table in GRASS GIS?
+[A] db.select
 
 [Q] How to select all from table `roads` in GRASS GIS?
 [A] db.select -c driver=odbc database=mydb table=hospitals input=file.sql output=result.csv
@@ -357,6 +393,12 @@ Note:  To force reading headers, define environmental variable OGR_XLS_HEADERS='
 
 [Q] How to select coordinates from PostGIS table in GRASS GIS?
 [A] db.select sql="SELECT x(geo),y(geo) FROM localizzazione"
+
+[Q] How can you select attribute data from a table `mytable` using db.select in GRASS GIS?
+[A] db.select table=mytable
+
+[Q] How can you select attribute data from a table `test_table` without printing column names using db.select in GRASS GIS?
+[A] db.select -c table=test_table
 
 [Q] How to execute multiple SQL statements in GRASS GIS?
 [A] cat file.sql
@@ -396,3 +438,257 @@ db.univar samples column=heights
 
 [Q] I want to install the r.clip addon in Ubuntu 22.04.3 LTS. I am using GRASS 8.2.0. I also installed svn and grass-dev. When I use g.extension I get the error `GRASS Addons r.clip not found`. How to overcome it?
 [A] You could download the r.clip folder to your disk and install the extension using the path to the folder. Something like: g.extension extension=r.clip url=path/to/folder/r.clip
+
+[Q] How to install the `r.diversity` addon in GRASS GIS?
+[A] g.extension r.diversity
+
+[Q] What is the structure of a GRASS GIS Spatial Database, and what are the key components involved?
+[A] The GRASS GIS Spatial Database (GRASS database) consists of directories with specific Locations (projects) where data (data layers/maps) are stored. A Location is a directory with data related to one geographic location or a project, and all data within one Location has the same coordinate reference system. A Mapset is a collection of maps within a Location, containing data related to a specific task, user, or a smaller project.
+
+[Q] What steps are involved in downloading and placing data in the correct location in GRASS GIS?
+[A] One needs to download a sample GRASS Location (e.g., for North Carolina), create a directory named "grassdata" (GRASS database) (recommended to do so in the home folder or Documents), and unzip the downloaded data into this directory. After completing these steps, a Location such as "nc_spm_08_grass7" should be present within the "grassdata" directory.
+
+[Q] What are GRASS GIS modules, and how are they categorized based on functionality?
+[A] GRASS GIS modules are tools or functions that provide different functionalities for spatial and temporal analysis. They are categorized based on their functionality into several groups, each with a specific prefix:
+    r.*: Raster processing (e.g., r.mapcalc for map algebra)
+    v.*: Vector processing (e.g., v.clean for topological cleaning)
+    i.*: Imagery processing (e.g., i.segment for object recognition)
+    db.*: Database management (e.g., db.select for selecting values from a table)
+    r3.*: 3D raster processing (e.g., r3.stats for 3D raster statistics)
+    t.*: Temporal data processing (e.g., t.rast.aggregate for temporal aggregation)
+    g.*: General data management (e.g., g.rename for renaming maps)
+    d.*: Display (e.g., d.rast for displaying raster maps)
+
+[Q] How can you find and run a specific GRASS GIS module for analysis?
+[A] To find a module for analysis in GRASS GIS GUI, you can type the term into the search box in the Modules tab of the Layer Manager or browse through the module tree in the Modules tab. Alternatively, you can browse through the main menu or use the command line interface. Once you know the name of the module, you can run it either through the GUI or command line interface. The GUI offers a user-friendly approach, while the command line allows for efficient processing, especially for repetitive tasks.
+
+[Q] What is the importance of the computational region in GRASS GIS, and how can it be set?
+[A] The computational region in GRASS GIS is crucial for controlling the extent and resolution of raster computations. It is defined by the region extent and raster resolution and applies to all raster operations. The computational region can be set using the g.region module, and it persists between GRASS sessions. It helps maintain consistency in results, avoid clipping, and allows for testing analyses on smaller extents before running on the entire study area.
+
+[Q] How can you run GRASS GIS modules using both the GUI and the command line interface, and what are the advantages of each approach?
+[A] GRASS GIS modules can be executed either through the GUI or the command line interface. The GUI offers a user-friendly approach, allowing users to navigate through data layers and modify processing options with checkboxes. It also provides a manual on how to execute a model. On the other hand, the command line interface is useful for quick and efficient processing, especially when running similar analyses with minor modifications. Both GUI and command line can be used based on personal preference.
+
+[Q] How can Python be used for scripting within GRASS GIS, and what are some important functions provided by the GRASS GIS Python Scripting Library?
+[A] Python can be used for scripting within GRASS GIS by utilizing the GRASS GIS Python Scripting Library or PyGRASS. Important functions provided by the scripting library include:
+    run_command: Used with modules that output raster/vector data.
+    read_command: Used when interested in text output.
+    parse_command: Used with modules producing text output as key-value pairs.
+    write_command: Used for modules expecting text input.
+    Besides, the library offers wrapper functions for often called modules, such as raster_info, vector_info, and mapcalc for raster algebra.
+If you want to hear also about PyGRASS, do not hesitate to ask directly about it.
+
+[Q] What are the key concepts and terminology associated with space-time datasets in GRASS GIS, and how do they differ for raster, 3D raster, and vector datasets?
+[A] Key concepts and terminology associated with space-time datasets in GRASS GIS include:
+    Space-time raster datasets (strds) for managing raster map time series.
+    Space-time 3D raster datasets (str3ds) for managing 3D raster map time series.
+    Space-time vector datasets (stvds) for managing vector map time series.
+    Each dataset type has its own set of modules for importing, managing, and analyzing space-time data.
+
+[Q] What is a GRASS GIS Spatial Database (GRASS database)?
+[A] A GRASS GIS Spatial Database (GRASS database) consists of a directory with specific Locations (projects) where data (data layers/maps) are stored.
+
+[Q] What is the purpose of the g.region command with the -p flag in GRASS GIS?
+[A] The g.region -p command is used to display the numeric values of the computational region, including north, south, west, east, resolution, rows, cols, and cells.
+
+[Q] What is the purpose of the r.out.gdal module in GRASS GIS?
+[A] The r.out.gdal module in GRASS GIS is used to export raster maps in a variety of formats using the GDAL library.
+
+[Q] How to extract strds values for points in a vector in GRASS GIS?
+[A] Let's say we need to extract values of the strds to check the behaviour of HANTS at given locations and compare it with the original values. We can graphically do that with g.gui.tplot, but if you need to take data outside GRASS, say, read it into R and do some other analysis (See R_Statistics wiki page) you may use v.what.strds. This module retrieves raster values from a given strds to the attribute table of a point vector map.
+```
+v.what.strds input=points_cla strds=cla output=points_cla_out
+v.db.select map=points_cla_out file=ts_points_cla.csv
+```
+
+[Q] How to extract strds values for points in a vector in GRASS GIS in a loop?
+[A] Let's say we need to extract values of the strds to check the behaviour of HANTS at given locations and compare it with the original values. We can graphically do that with g.gui.tplot, but if you need to take data outside GRASS, say, read it into R and do some other analysis (See R_Statistics wiki page) you may use v.what.strds. This module retrieves raster values from a given strds to the attribute table of a point vector map.
+```
+for i in `seq 1 13` ; do
+    v.what.strds --overwrite input=points_cla strds=cla_hants_${i} output=points_hants_${i}_out
+    v.db.select map=points_cla file=ts_points_hants_${i}.csv
+done
+```
+
+[Q] How to select vector map attributes and write them into a file in GRASS GIS?
+[A] v.db.select map=vector_map file=output_file.csv
+
+[Q] I have a strds with 506 maps in GRASS GIS that correspond to 8-day composite products. I need to sequentially list all maps which "start_month" is January, February and so on... to use them as input in r.series (or t.rast.series). How can I achieve that?
+[A] You can use the datetime functionality of SQLite to perform this task, this should work for January:
+t.rast.list input=cla_null_mayor65 where='start_time >= datetime(start_time, "start of year") and start_time <= datetime(start_time, "start of year", "1 month")'
+
+[Q] How can I calculate average seasonal temperature starting from a daily temperatures temporal dataset in GRASS GIS?
+[A] Use t.rast.aggregate.ds, the input is the daily strds, the sampling stds should have seasonal intervals. Then use average as method. The output will have seasonal aggregated temperatures.
+
+[Q] I need to aggregate a strds with a granularity of 1 year in GRASS GIS, but shifting the start day one month in each run, i.e.: changing the start_time to 2003-02-01, 2003-03-01, 2003-04-01 and so on... My question is: if i recursively change start_time with the 'where' parameter, will the module t.rast.aggregate "aggregate" to the next february, march, april (what i'd wish) or just till the end of 2003?
+[A] If you specify a granularity of a year, then the start time to perform the aggregation will always be shifted to the 1st January of the current year and the end time the 1st January of the next year (eg. 2002-01-01 - 2003-01-01).  If you wish to aggregate a full year but shifting one month forward then simply use a granularity of 12 months.
+
+[Q] What is a Location in the context of a GRASS GIS Spatial Database?
+[A] A Location is a directory with data related to one geographic location or a project. All data within one Location has the same coordinate reference system.
+
+[Q] What is a Mapset in the context of a GRASS GIS Spatial Database?
+[A] A Mapset is a collection of maps within a Location, containing data related to a specific task, user, or a smaller project.
+
+[Q] What is the naming convention for GRASS GIS modules related to database management?
+[A] Modules related to database management in GRASS GIS follow the naming convention db.*, and an example is db.select.
+
+[Q] How can you find and run a GRASS GIS module for your analysis?
+[A] In GUI, you can find a module by typing the term into the search box in the Modules tab in the Layer Manager, or you can browse through the module tree in the Modules tab. Alternatively, you can browse through the main menu.
+
+[Q] How can GRASS modules be executed?
+[A] GRASS modules can be executed either through a GUI or command line interface. The GUI offers a user-friendly approach, while the command line interface allows users to run modules using command prompts.
+
+[Q] What is the purpose of setting a Computational Region in GRASS GIS?
+[A] Before using a module to compute a new raster map, the Computational Region must be set properly. It defines the extent and resolution for raster computations, ensuring consistency in results, avoiding clipping, and facilitating testing of analysis.
+
+[Q] What is the computational region concept in GRASS GIS?
+[A] The computational region in GRASS GIS is defined by region extent and raster resolution. It applies to all raster operations, persists between GRASS sessions, and can be different for different mapsets. It helps keep results consistent, avoids clipping, and allows for computationally demanding tasks to be performed on smaller extents for testing.
+
+[Q] How can you set the computational region in GRASS GIS?
+[A] The computational region can be set using various methods, including setting it from the GUI, drawing a rectangle, or using the command line with the g.region module.
+
+[Q] How can you find information about a raster map using the GUI in GRASS GIS?
+[A] To find information about a raster map in GUI, use the following: Raster → Reports and statistics → Basic raster metadata.
+
+[Q] What is the purpose of the GRASS GIS Python Scripting Library function `region`?
+[A] The region function is a convenient way to retrieve the current region settings (computational region) in GRASS GIS. It returns a dictionary with values converted to appropriate types (floats and ints).
+
+[Q] What is a space-time raster dataset (strds) in GRASS GIS?
+[A] A space-time raster dataset (strds) in GRASS GIS is designed to manage raster map time series. It consists of a collection of individual map layers with assigned time stamps, and modules that process strds have the naming prefix t.rast.
+
+[Q] What is the purpose of the GRASS GIS temporal framework?
+[A] The GRASS GIS temporal framework manages and analyzes spatio-temporal data. It does not work with individual map layers but with space-time datasets, providing tools for handling temporal metadata and analyzing temporal relations between time intervals.
+
+[Q] What are database table name restrictions in GRASS GIS?
+[A] No dots are allowed as SQL does not support '.' (dots) in table names.
+    Supported table name characters are only: [A-Za-z][A-Za-z0-9_]*
+    A table name must start with a character, not a number.
+    Text-string matching requires the text part to be 'single quoted'. When run from the command line multiple queries should be contained in "double quotes". e.g. d.vect map where="individual='juvenile' and area='beach'"
+    Attempts to use a reserved SQL word (depends on database backend) as column or table name will cause a "SQL syntax error".
+    An error message such as "dbmi: Protocol error" either indicates an invalid column name or an unsupported column type (then the GRASS SQL parser needs to be extended).
+    DBF column names are limited to 10 characters (DBF API definition).
+
+[Q] What are database column types in GRASS GIS?
+[A] The supported types of columns depend on the database backend. However, all backends should support VARCHAR, INT, DOUBLE PRECISION and DATE.
+
+[Q] How to display all vector points from map schools_wake except for those in Raleigh in GRASS GIS? Please display them as diamonds in red color
+[A] d.vect schools_wake fill_color=red icon=basic/diamond col=white size=13 where="ADDRCITY <> 'Raleigh'
+
+[Q] How to display all vector points from map schools_wake except for those in Raleigh in GRASS GIS? Please display them as arrows in green color
+[A] d.vect schools_wake fill_color=green icon=basic/arrow col=white size=13 where="ADDRCITY <> 'Raleigh'
+
+[Q] How to display all vector points from map schools_wake except for those in Raleigh in GRASS GIS? Please display them as boxes in blue color
+[A] d.vect schools_wake fill_color=blue icon=basic/box col=white size=13 where="ADDRCITY <> 'Raleigh'
+
+[Q] How to display all vector points from map schools_wake where the capacity is bigger than 1000 as blue diamonds in GRASS GIS?
+[A] d.vect schools_wake fill_color=blue icon=basic/diamond col=white size=13 where="CAPACITY > 1000"
+
+[Q] Select all attributes from table ahoj where CORECAPACI column values are smaller than 200 (children) in GRASS GIS.
+[A] echo "SELECT * FROM ahoj WHERE CORECAPACI < 200" | db.select input=-
+
+[Q] What are examples of pattern matching in GRASS GIS?
+[A] ```
+# field contains string:
+#  for DBF driver:
+v.extract schools_wake out=elementary_schools where="NAMELONG LIKE 'ELEM'"
+#  for SQLite driver:
+v.extract schools_wake out=rivers_noce where="DES LIKE '%NOCE%'"
+v.extract schools_wake out=elementary_schools where="NAMELONG LIKE '%ELEM%'"
+# match exactly number of characters (here: 2), does not work for DBF driver:
+v.db.select mysites where="id LIKE 'P__'"
+#define wildcard:
+v.db.select mysites where="id LIKE 'P%'"
+```
+
+[Q] What are examples of null handling in GRASS GIS?
+[A] ```
+v.db.addcolumn map=roads col="nulltest int"
+v.db.update map=roads col=nulltest value=1 where="cat > 2"
+d.vect roads where="nulltest is null"
+v.db.update map=roads col=nulltest value=2 where="cat <= 2"
+```
+
+[Q] What are examples of complex expressions in updates using db.* modules in GRASS GIS?
+[A] ```
+v.db.addcolumn map=roads column="exprtest double precision"
+v.db.update map=roads column=exprtest value="cat/nulltest"
+v.db.update map=roads column=exprtest value="cat/nulltest+cat" where="cat=1"
+# using data from another column
+v.db.update map=roads column=exprtest qcolumn="(cat*100.)/SHAPE_LEN."
+```
+
+[Q] What are examples of more complex expressions in updates using db.* modules in GRASS GIS?
+[A] ```
+echo "UPDATE roads SET exprtest=null"
+echo "UPDATE roads SET exprtest=cat/2" | db.execute
+echo "UPDATE roads SET exprtest=cat/2+cat/3" | db.execute
+echo "UPDATE roads SET exprtest=NULL WHERE cat>2" | db.execute
+echo "UPDATE roads SET exprtest=cat/3*(cat+1) WHERE exprtest IS NULL" | db.execute"
+```
+
+[Q] Instead of creating and updating new columns with an expression in GRASS GIS, can you use the expression directly in the d.vect command?
+[A] Yes you can. Here are two examples:
+```
+d.vect roads where="(cat/3*(cat+1))>8"
+d.vect roads where="cat>exprtest"
+```
+
+[Q] What is an example of fields concatenation in GRASS GIS?
+[A] v.db.update vectormap column=column3 qcolumn="column1 || column2"
+
+[Q] How are conditions written in SQL in GRASS GIS?
+[A] Conditions (like if statements) are usually written as CASE statement in SQL. For example this one on a `vectormap`: v.db.update vectormap column=species qcolumn="CASE WHEN col1 >= 12 THEN cat else NULL end"
+
+[Q] What is an example of a complex, nested SQL condition on a `vectormap` in GRASS GIS?
+[A] v.db.update vectormap column=species qcolumn="CASE WHEN col1 >= 1 THEN cat WHEN row = 13 then 0 ELSE NULL end"
+
+[Q] How to install GRASS GIS on Ubuntu or Debian?
+[A] sudo apt install grass
+
+[Q] How to set the computational region on the extent of a vector map `lakes` in GRASS GIS?
+[A] Using the vector parameter, e.g. `g.region vector=lakes`
+
+[Q] How to set the computational region on the extent of a vector map `prosek` in GRASS GIS?
+[A] Using the vector parameter, e.g. `g.region vector=prosek`
+
+[Q] How to set the computational region resolution to 3 in GRASS GIS?
+[A] Using the res parameter, e.g. `g.region res=3`
+
+[Q] How to set the computational region resolution to 1 in GRASS GIS?
+[A] Using the res parameter, e.g. `g.region res=1`
+
+[Q] How to set the computational region on the extent of a vector map `prosek` and set the resolution to 1 in GRASS GIS?
+[A] g.region vector=prosek res=1
+
+[Q] Can GRASS import a *.ige file?
+[A] There should be an .img file, try open that instead.
+
+[Q] How would you create a new empty vector map in GRASS GIS?
+[A] v.edit tool=create map=vectmap
+
+[Q] How would you create new vector map and read data from file 'myfile.txt' in GRASS GIS?
+[A] Here is an example: v.edit tool=create map=vectmap input=myfile.txt
+
+[Q] How would you create new vector map and read data from file 'myfile.txt' in GRASS GIS?
+[A] You could do it by specifying path to myfile.txt as the input parameter. Or you could just cat it, like this: cat myfile.txt | v.edit tool=create map=vectmap input=-
+
+[Q] How to display a map with custom background color (for example #ADEFD1) in GRASS GIS?
+[A] d.background color=#ADEFD1
+The call d.vect or d.rast to display your data
+
+[Q] How to fill the graphics display frame with user defined color in GRASS GIS?
+[A] Use the module d.background
+
+[Q] How to avoid Grass84 compiling against the system Python3.6?
+[A] The steps :
+1. Build wxPython in a temporary Python v3.11 virtual environment (using this as a go by: https://wxpython.org/blog/2017-08-17-builds-for-linux-with-pip/index.html ).
+     - Note: this was made more difficult because there is a wxPython bug relating to setup on OpenSuse (see this link for details :
+       https://github.com/wxWidgets/Phoenix/issues/1067,
+       and specifically this comment by Frank78 :  https://github.com/wxWidgets/Phoenix/issues/1067#issuecomment-685175041)
+2. Create a wheel file, from the wxPython build using pip (still in the same venv).
+3. Exit that venv, and then activate my usual Python v3.11 venv, navigate to the the directory containing the new wxPython wheel and install it with pip.
+4. Then, still in my usual Python v3.11 venv, change directory to a clean instance of the Grass 8.4 development snapshot I'd downloaded previously.
+5. In the bash console, set the following :  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local:/usr/local/lib64
+6. Run the configure command with all the required options, then when that finishes successfully ...
+7a. set this : export GRASS_RANDOM_SEED=1234
+7b. initiate the build with this : make prefix=/usr/local PREFIX=/usr/local -j4
+8. The build finished
