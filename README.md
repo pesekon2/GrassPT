@@ -12,5 +12,5 @@ nohup docker build -t grasspt:1.0 -f docker/Dockerfile . &
 Ask a query:
 
 ```
-docker run --rm --gpus all grasspt:1.0 python3 /src/query.py " How to get metadata of a raster map in GRASS GIS?"
+docker run --rm --gpus all grasspt:1.0 python3 /src/query.py --query "How to get metadata of a raster map in GRASS GIS?"
 ```
