@@ -1,6 +1,7 @@
 import argparse
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel, GPT2TokenizerFast, GPT2Tokenizer
 
+
 def load_model(model_path):
     model = GPT2LMHeadModel.from_pretrained(model_path)
     return model
@@ -10,8 +11,8 @@ def load_tokenizer(tokenizer_path):
     tokenizer = GPT2Tokenizer.from_pretrained(tokenizer_path)
     return tokenizer
 
-def generate_text(model_path, sequence, max_length):
 
+def generate_text(model_path, sequence, max_length):
     model = load_model(model_path)
     tokenizer = load_tokenizer(model_path)
     ids = tokenizer.encode(f'{sequence}', return_tensors='pt')
@@ -25,7 +26,9 @@ def generate_text(model_path, sequence, max_length):
         # num_return_sequences=1
         # pad_token_id=tokenizer.eos_token_id
     )
+
     print(tokenizer.decode(final_outputs[0], skip_special_tokens=True))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -40,6 +43,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    model2_path = "/tmp/m"
+    model2_path = 'out'
     max_len = 800
     generate_text(model2_path, args.query, max_len)
