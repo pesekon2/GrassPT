@@ -1,5 +1,6 @@
 import os
 import re
+import argparse
 
 import numpy as np
 
@@ -103,9 +104,18 @@ def train(train_file_path, model_name, output_dir, overwrite_output_dir,
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser('Train a model.')
+
+    parser.add_argument(
+        '--nr_epochs', type=int, default=50,
+        help='Number of epochs to train the model.'
+    )
+
+    args = parser.parse_args()
+
     train_input_file = 'training_data/q_and_a.txt'
     end_of_info = r'\n\n'
-    out_dir = 'out'
+    outdir = os.path.join('out', str(args.nr_epochs))
     model_name = 'gpt2'
     epochs_nr = 50
     batch_size_per_device = 8
@@ -116,7 +126,9 @@ if __name__ == '__main__':
     text_data = parse_document(train_input_file, end_of_info)
 
     # write it refactored as the training txt
-    train_refactored_file = os.path.join(out_dir, 'train.txt')
+    train_refactored_file = os.path.join(outdir, 'train.txt')
+    if os.path.isdir(outdir) is False:
+        os.makedirs(outdir)
     with open(train_refactored_file, 'w') as f:
         f.write(text_data)
 
@@ -124,9 +136,9 @@ if __name__ == '__main__':
     train(
         train_file_path=train_refactored_file,
         model_name=model_name,
-        output_dir=out_dir,
+        output_dir=outdir,
         overwrite_output_dir=overwrite_output_dir,
         per_device_train_batch_size=batch_size_per_device,
-        num_train_epochs=epochs_nr,
+        num_train_epochs=args.nr_epochs,
         save_steps=save_steps
     )
