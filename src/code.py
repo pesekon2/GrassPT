@@ -1,48 +1,64 @@
-import numpy as np
-import re
-from PyPDF2 import PdfReader
 import os
-import docx
+import re
+
+import numpy as np
+
 
 # Functions to read different file types
 def read_pdf(file_path):
-    with open(file_path, "rb") as file:
+    from PyPDF2 import PdfReader
+
+    with open(file_path, 'rb') as file:
         pdf_reader = PdfReader(file)
         text = ""
         for page_num in range(len(pdf_reader.pages)):
             text += pdf_reader.pages[page_num].extract_text()
+
     return text
 
+
 def read_word(file_path):
+    import docx
+
     doc = docx.Document(file_path)
-    text = ""
+    text = ''
     for paragraph in doc.paragraphs:
-        text += paragraph.text + "\n"
+        text += paragraph.text + '\n'
+
     return text
+
 
 def read_txt(file_path):
     with open(file_path, "r") as file:
         text = file.read()
+
     return text
 
-def read_documents_from_directory(file_path):
-    combined_text = ""
-    if file_path.endswith(".pdf"):
-        combined_text += read_pdf(file_path)
-    elif file_path.endswith(".docx"):
-        combined_text += read_word(file_path)
-    elif file_path.endswith(".txt"):
-        combined_text += read_txt(file_path)
+
+def parse_document(file_path, end_of_info=r'\n\n'):
+    if file_path.endswith('.pdf'):
+        combined_text = read_pdf(file_path)
+    elif file_path.endswith('.docx'):
+        combined_text = read_word(file_path)
+    elif file_path.endswith('.txt'):
+        combined_text = read_txt(file_path)
+    else:
+        raise Exception(f'File {file_path} does not exist')
+
+    combined_text = re.sub(end_of_info, '<|endoftext|>', combined_text)
+    combined_text = combined_text.strip()  # Remove excess newline characters
+
     return combined_text
 
-# Read documents from the directory
-#train_directory = '/tmp/drive/MyDrive/ColabNotebooks/data/chatbot_docs/training_data/full_text'
-train_directory = '/src/q_and_a.txt'
-text_data = read_documents_from_directory(train_directory)
-text_data = re.sub(r'\n\n', '<|endoftext|>', text_data).strip()  # Remove excess newline characters
 
-with open("/tmp/c/train.txt", "w") as f:
-    f.write(text_data)
+if __name__ == '__main__':
+    # Read documents from the directory
+    #train_directory = '/tmp/drive/MyDrive/ColabNotebooks/data/chatbot_docs/training_data/full_text'
+    train_file = 'src/q_and_a.txt'
+    text_data = parse_document(train_file)
+
+    with open('/tmp/trainings/train.txt', 'w') as f:
+        f.write(text_data)
 
 from transformers import TextDataset, DataCollatorForLanguageModeling
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
@@ -98,13 +114,13 @@ def train(train_file_path,model_name,
 
 
 #train_file_path = "/tmp/drive/MyDrive/ColabNotebooks/data/chatbot_docs/combined_text/full_text/train.txt"
-train_file_path = "/tmp/c/train.txt"
+train_file_path = "/tmp/trainings/train.txt"
 model_name = 'gpt2'
 #output_dir = '/tmp/drive/MyDrive/ColabNotebooks/models/chat_models/custom_full_text'
 output_dir = '/tmp/m'
 overwrite_output_dir = True
 per_device_train_batch_size = 8
-num_train_epochs = 500.0
+num_train_epochs = 80  # 500.0
 save_steps = 50000
 
 # Train
@@ -146,7 +162,7 @@ def generate_text(model_path, sequence, max_length):
     )
     print(tokenizer.decode(final_outputs[0], skip_special_tokens=True))
 
-model2_path = "/tmp/m"
-sequence2 = "[Q] How to handle raster data in GRASS GIS?"
+model2_path = '/tmp/m'
+sequence2 = '[Q] How to handle raster data in GRASS GIS?'
 max_len = 800
 generate_text(model2_path, sequence2, max_len)
