@@ -41,8 +41,12 @@ if __name__ == '__main__':
         help='The query you would like to ask about GRASS GIS'
     )
 
+    parser.add_argument(
+        '--model', type=str,
+        help='Path to the model to be used to answer'
+    )
+
     args = parser.parse_args()
 
-    model2_path = 'out'
     max_len = 800
-    generate_text(model2_path, args.query, max_len)
+    generate_text(args.model, args.query, max_len)
