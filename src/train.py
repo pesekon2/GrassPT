@@ -8,6 +8,10 @@ from transformers import DataCollatorForLanguageModeling, GPT2Tokenizer,\
         GPT2LMHeadModel, TextDataset, Trainer, TrainingArguments
 
 
+class ConfigError(Exception):
+    pass
+
+
 # Functions to read different file types
 def read_pdf(file_path: str) -> str:
     from PyPDF2 import PdfReader
@@ -47,7 +51,7 @@ def parse_document(file_path: str, end_of_info: str = r'\n\n') -> str:
     elif file_path.endswith('.txt'):
         combined_text = read_txt(file_path)
     else:
-        raise Exception(f'File {file_path} does not exist')
+        raise ConfigError(f'File {file_path} does not exist')
 
     combined_text = re.sub(end_of_info, '<|endoftext|>', combined_text)
     combined_text = combined_text.strip()  # Remove excess newline characters
@@ -123,7 +127,12 @@ if __name__ == '__main__':
     overwrite_output_dir = True
 
     # Read the training file
-    text_data = parse_document(train_input_file, end_of_info)
+    if os.path.isfile(train_input_file):
+        text_data = parse_document(train_input_file, end_of_info)
+    elif os.path.isdir(train_input_file):
+        text_data = parse_directory(train_input_file)
+    else:
+        raise ConfigError(f'File {file_path} does not exist')
 
     # write it refactored as the training txt
     train_refactored_file = os.path.join(outdir, 'train.txt')
