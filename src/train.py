@@ -1,6 +1,8 @@
+import argparse
+import glob
 import os
 import re
-import argparse
+import tempfile
 
 import numpy as np
 
@@ -57,6 +59,27 @@ def parse_document(file_path: str, end_of_info: str = r'\n\n') -> str:
     combined_text = combined_text.strip()  # Remove excess newline characters
 
     return combined_text
+
+
+def parse_directory(dir_path: str) -> str:
+    parsed_text = ''
+    for file_path in glob.glob(os.path.join(dir_path, '*.txt')):
+        read_text = read_txt(file_path)
+
+        # GRASS module docs cleaning
+        if 'Table of contents' in read_text:
+            a = read_text.split('Table of contents')[0]
+            if '  AUTHOR' in read_text:
+                a += read_text.split('AUTHOR')[1]
+            read_text = a
+        if 'SEE ALSO' in read_text:
+            parsed_text += read_text.split('SEE ALSO')[0]
+        else:
+            parsed_text += read_text
+
+        parsed_text += '<|endoftext|>'
+
+    return parsed_text.strip()  # Remove excess newline characters
 
 
 def load_dataset(file_path: str, tokenizer, block_size: int = 128):
@@ -127,10 +150,10 @@ if __name__ == '__main__':
     overwrite_output_dir = True
 
     # Read the training file
-    if os.path.isfile(train_input_file):
-        text_data = parse_document(train_input_file, end_of_info)
-    elif os.path.isdir(train_input_file):
-        text_data = parse_directory(train_input_file)
+    if os.path.isfile(args.training_data):
+        text_data = parse_document(args.training_data, end_of_info)
+    elif os.path.isdir(args.training_data):
+        text_data = parse_directory(args.training_data)
     else:
         raise ConfigError(f'File {file_path} does not exist')
 
