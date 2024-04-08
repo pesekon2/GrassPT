@@ -39,7 +39,7 @@ def read_word(file_path: str) -> str:
 
 
 def read_txt(file_path: str) -> str:
-    with open(file_path, "r") as file:
+    with open(file_path, 'r') as file:
         text = file.read()
 
     return text
@@ -138,13 +138,17 @@ if __name__ == '__main__':
         help='Number of epochs to train the model.'
     )
 
+    parser.add_argument(
+            '--training_data', type=str, default='training_data/q_and_a.txt',
+        help='path to a file containing the training data or a directory '
+             'containing training *.txt files'
+    )
+
     args = parser.parse_args()
 
-    train_input_file = 'training_data/q_and_a.txt'
     end_of_info = r'\n\n'
     outdir = os.path.join('out', str(args.nr_epochs))
     model_name = 'gpt2'
-    epochs_nr = 50
     batch_size_per_device = 8
     save_steps = 50000
     overwrite_output_dir = True
@@ -155,7 +159,9 @@ if __name__ == '__main__':
     elif os.path.isdir(args.training_data):
         text_data = parse_directory(args.training_data)
     else:
-        raise ConfigError(f'File {file_path} does not exist')
+        raise ConfigError(
+            f'File or directory {args.training_data} does not exist'
+        )
 
     # write it refactored as the training txt
     train_refactored_file = os.path.join(outdir, 'train.txt')
