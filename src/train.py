@@ -116,7 +116,8 @@ def train(train_file_path, model_name, output_dir, overwrite_output_dir,
         output_dir=output_dir,
         overwrite_output_dir=overwrite_output_dir,
         per_device_train_batch_size=per_device_train_batch_size,
-        num_train_epochs=num_train_epochs
+        num_train_epochs=num_train_epochs,
+        save_steps=save_steps
     )
 
     trainer = Trainer(
