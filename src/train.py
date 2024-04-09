@@ -11,16 +11,24 @@ from transformers import DataCollatorForLanguageModeling, GPT2Tokenizer,\
 
 
 class ConfigError(Exception):
+    """Exception to be raised if the config of the model is invalid."""
     pass
 
 
 # Functions to read different file types
 def read_pdf(file_path: str) -> str:
+    """Read a .pdf file.
+
+    In order to read a .pdf file, the Python package PyPDF2 has to be installed
+
+    :param file_path: path to the file
+    :return: string with the contents of the file
+    """
     from PyPDF2 import PdfReader
 
     with open(file_path, 'rb') as file:
         pdf_reader = PdfReader(file)
-        text = ""
+        text = ''
         for page_num in range(len(pdf_reader.pages)):
             text += pdf_reader.pages[page_num].extract_text()
 
@@ -28,6 +36,13 @@ def read_pdf(file_path: str) -> str:
 
 
 def read_word(file_path: str) -> str:
+    """Read a .docx file.
+
+    In order to read a .docx file, the Python package docx has to be installed
+
+    :param file_path: path to the file
+    :return: string with the contents of the file
+    """
     import docx
 
     doc = docx.Document(file_path)
@@ -39,6 +54,11 @@ def read_word(file_path: str) -> str:
 
 
 def read_txt(file_path: str) -> str:
+    """Read a .txt file.
+
+    :param file_path: path to the file
+    :return: string with the contents of the file
+    """
     with open(file_path, 'r') as file:
         text = file.read()
 
@@ -46,6 +66,14 @@ def read_txt(file_path: str) -> str:
 
 
 def parse_document(file_path: str, end_of_info: str = r'\n\n') -> str:
+    """Parse a single file to get a training data string.
+
+    :param file_path: path to a file containg the training data
+    :param end_of_info: every end_of_info occurence is considered the end of an
+        information chunk and is therefore replaced with '<|endoftext|>'
+    :return: string containg all the training data information separated by
+        <|endoftext|>
+    """
     if file_path.endswith('.pdf'):
         combined_text = read_pdf(file_path)
     elif file_path.endswith('.docx'):
@@ -62,6 +90,17 @@ def parse_document(file_path: str, end_of_info: str = r'\n\n') -> str:
 
 
 def parse_directory(dir_path: str) -> str:
+    """Parse all *.txt files in directory to get a single training data string.
+
+    '<|endoftext|>' is added to the end of every file to separate their
+    contents. ALso, if 'Table of contents' is present in a file, it is
+    considered a GRASS GIS module manual and sections Table of contents,
+    AUTHOR, SEE ALSO, and SOURCE CODE are deleted from the read file.
+
+    :param dir_path: path to a directory containg training *.txt files
+    :return: string containg all the training data information separated by
+        <|endoftext|>
+    """
     parsed_text = ''
     for file_path in glob.glob(os.path.join(dir_path, '*.txt')):
         read_text = read_txt(file_path)
@@ -83,6 +122,14 @@ def parse_directory(dir_path: str) -> str:
 
 
 def load_dataset(file_path: str, tokenizer, block_size: int = 128):
+    """Load dataset as a TextDataset object.
+
+    :param file_path: path to the file including training data
+    :param tokenizer: an object performing the tokenization (the process of
+        converting a sequence of text into tokens, i.e. smaller parts)
+    :param block_size: size of individual blocks in the dataset
+    :return: a TextDataset object
+    """
     dataset = TextDataset(
         tokenizer = tokenizer,
         file_path = file_path,
@@ -93,6 +140,16 @@ def load_dataset(file_path: str, tokenizer, block_size: int = 128):
 
 
 def load_data_collator(tokenizer, mlm: bool = False):
+    """Load the data collator.
+
+    Data collators are objects that will form a batch by using a list of dataset
+    elements as input.
+
+    :param tokenizer: an object performing the tokenization (the process of
+        converting a sequence of text into tokens, i.e. smaller parts)
+    :param mlm: boolean saying whether to use masked language modeling
+    :return: data collator object
+    """
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         mlm=mlm
@@ -100,8 +157,22 @@ def load_data_collator(tokenizer, mlm: bool = False):
 
     return data_collator
 
-def train(train_file_path, model_name, output_dir, overwrite_output_dir,
-          per_device_train_batch_size, num_train_epochs, save_steps):
+def train(train_file_path: str, output_dir: str,
+          overwrite_output_dir: bool = False, model_name: str = 'gpt2',
+          per_device_train_batch_size: int = 8, num_train_epochs: int = 50,
+          save_steps: int = 50000) -> None:
+    """Train a model.
+
+    :param train_file_path: path to a filename containing training data.
+        Sectors or chunks of information should be separated by '<|endoftext|>'
+    :param output_dir: directory where the output model will be written
+    :param overwrite_output_dir: boolean saying whether to overwrite the output
+        directory or not
+    :param model_name: name of a pretrained model to be used
+    :param per_device_train_batch_size: batch size per one computation device
+    :param num_train_epochs: number of training epochs
+    :param save_steps: after how many steps should be checkpoint models written
+    """
     tokenizer = GPT2Tokenizer.from_pretrained(model_name)
     train_dataset = load_dataset(train_file_path, tokenizer)
     data_collator = load_data_collator(tokenizer)
@@ -174,9 +245,9 @@ if __name__ == '__main__':
     # train
     train(
         train_file_path=train_refactored_file,
-        model_name=model_name,
         output_dir=outdir,
         overwrite_output_dir=overwrite_output_dir,
+        model_name=model_name,
         per_device_train_batch_size=batch_size_per_device,
         num_train_epochs=args.nr_epochs,
         save_steps=save_steps
